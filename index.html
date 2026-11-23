@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Archivo de Campaña</title>
+<style>
+:root{color-scheme:dark;--gold:#e9b84a;--soft:#aebddd;--line:#304b78}*{box-sizing:border-box}body{margin:0;background:#050b22;color:#fff;font:16px system-ui,sans-serif;min-height:100vh}body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 20% 0,#1749b567,transparent 55%),radial-gradient(ellipse at 80% 30%,#39225c77,transparent 54%),repeating-radial-gradient(ellipse at 52% 120%,transparent 0 47px,#648ce619 49px 50px);z-index:-1}#app{max-width:1400px;margin:auto;padding:clamp(14px,4vw,56px)}header,.row,.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}header{border-bottom:1px solid var(--line);padding-bottom:18px}small,.muted{color:var(--soft)}.label{text-transform:uppercase;letter-spacing:.16em;color:var(--gold);font-size:.74rem;font-weight:800}h1,h2,p{margin:0 0 .7em}h1{font-size:clamp(2rem,5vw,4.4rem);letter-spacing:-.055em;margin:.1em 0}h2{font-size:clamp(1.3rem,3vw,2.3rem);line-height:1.21}button,input,select,textarea{font:inherit;color:inherit;border:1px solid #4967a4;background:#0a1938;border-radius:8px;padding:.65em .85em}button{cursor:pointer;font-weight:650;transition:background .2s,border-color .2s}button:hover:not(:disabled){background:#1749b5;border-color:#a5bbff}button:disabled{opacity:.42;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.primary{background:#e9b84a;color:#141b2f;border-color:#ffe6a0}.primary:hover:not(:disabled){background:#ffd97e}.panel{border:1px solid var(--line);background:#09152de8;border-radius:15px;padding:clamp(15px,3vw,32px);margin-top:16px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,230px);gap:18px}.ladder{list-style:none;padding:0;margin:0;display:grid;gap:3px;font-variant-numeric:tabular-nums}.ladder li{display:flex;justify-content:space-between;padding:4px 8px;color:#aebddd;border-radius:5px}.ladder li.safe{border:1px solid #9c7d38;color:#ffda82}.ladder li.passed{background:#142850;color:white}.ladder li.live{background:#f4a623;color:#171324;font-weight:800}.ladder li:first-child{font-weight:900}.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.answer{display:flex;align-items:center;min-height:72px;text-align:left;gap:12px;background:linear-gradient(110deg,#153058,#0b1a3a);border:1px solid #5377b8;border-radius:5px 18px 5px 18px;overflow-wrap:anywhere;animation:enter .26s both}.answer b{display:grid;place-items:center;flex:0 0 2em;aspect-ratio:1;background:#050b22;color:#ffcf65;transform:skew(-8deg);border:1px solid #496894}.answer.selected,.answer.selected:hover{background:#f4a623;color:#171324}.answer.correct{background:#22c55e;color:#07180f;animation:flash .34s 3}.answer.wrong{background:#a51e35;color:white}.answer.correct:disabled,.answer.wrong:disabled,.answer.selected:disabled{opacity:1}.answer.gone{opacity:.24}.toolbar{justify-content:flex-start;margin:12px 0}.aid{border-radius:100px}.stage{position:relative;min-width:0}.stage.suspense{box-shadow:0 0 85px #050711 inset;border-color:#ba8b3e}.stage.win{box-shadow:0 0 75px #e9b84a5e;border-color:var(--gold);animation:flash .6s 3}.stage.loss{background:#071023}.progress{height:4px;background:#273953;margin:14px 0 24px;border-radius:4px;overflow:hidden}.progress span{display:block;height:100%;background:var(--gold);transition:width .4s}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,178px),1fr));gap:14px;margin:14px 0}.form label{display:grid;gap:6px;color:var(--soft);min-width:0}.form :is(input,select){width:100%}.form input[type=checkbox]{width:auto}.notice{min-height:24px;color:#ffdb8c}.poll{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end;text-align:center}.bar{display:block;margin:auto;width:70%;background:#477be2;border-radius:5px;height:calc(var(--v)*1px);animation:rise 450ms}.review{padding:15px 0;border-top:1px solid var(--line)}summary{cursor:pointer;font-weight:700}textarea{width:100%;min-height:80px}#status{min-height:1.5em}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}@keyframes enter{from{opacity:0;transform:translateY(7px)}}@keyframes rise{from{transform:scaleY(0);transform-origin:bottom}}@keyframes flash{50%{filter:brightness(1.24)}}@media(max-width:660px){.layout{grid-template-columns:1fr}.answer{padding:.55em;font-size:.9rem;min-height:65px;gap:6px}.answer b{flex-basis:1.5em}.ladder{grid-template-columns:repeat(3,1fr);font-size:.78rem}.ladder li{padding:4px}}@media(prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+</style></head>
+<body><div id="app"><header><div><div class="label">Historia militar · Segunda Guerra Mundial</div><h1 id="title">Archivo de Campaña</h1></div><div class="toolbar"><button id="mute">Silenciar</button><button id="full">Pantalla completa</button></div></header><div id="screen"></div><div id="status" role="status" class="sr-only"></div></div>
+<script>
+'use strict';
+const plans='Planes y Operaciones II GM, p. 1';
+const fin='Guía 01a, Campaña de Finlandia';
+const chrono='Cuadro Cronológico II GM, p. 1';
+const eval3='Evaluación 004003 y hoja de solución';
+const entries=[];
+function group(topic, source, rows){
+  for(const [level,question,correct,b,c,d,explain] of rows){
+    entries.push({id:entries.length+1,topic,source,level,question,answers:[correct,b,c,d],correct:0,explain});
+  }
+}
+group('Finlandia',fin,[
+ [1,'¿Qué país inició la ofensiva contra Finlandia el 30 de noviembre de 1939?','Unión Soviética','Alemania','Noruega','Suecia','La guía sitúa el inicio de la ofensiva soviética el 30 de noviembre. Véase p. 19.'],
+ [1,'¿Cómo se llamaba la línea defensiva finlandesa en el istmo de Carelia?','Línea Mannerheim','Línea Maginot','Línea Sigfrido','Línea Dyle','La guía identifica las fortificaciones del istmo como línea Mannerheim. Véase p. 17.'],
+ [1,'¿Qué puerto quería arrendar la Unión Soviética?','Hangoe','Narvik','Dunkerque','Cherburgo','La propuesta soviética incluía arrendar Hangoe por 30 años. Véase p. 16.'],
+ [2,'¿Cuándo ordenó Finlandia el cese del fuego en todos los frentes?','13 de marzo de 1940','30 de noviembre de 1939','15 de febrero de 1940','2 de marzo de 1940','El 30 de noviembre empezó la ofensiva soviética, el 15 de febrero se ordenó una retirada finlandesa y el 2 de marzo los soviéticos alcanzaron la bahía de Viborg. El cese del fuego fue el 13 de marzo. Véase p. 19.'],
+ [2,'¿Quién aparece al mando de las fuerzas finlandesas en el esquema de la guía?','Mariscal Mannerheim','General Timoshenko','Mariscal Voroshilov','General Student','Mannerheim figura al mando finlandés. Timoshenko y Voroshilov aparecen vinculados al mando soviético, y Student se menciona en la evaluación de Creta. Véanse pp. 18–19 y Evaluación 004003, pregunta 11.'],
+ [3,'¿Qué ciudad fue atacada el 6 de diciembre de 1939, según la guía?','Taipale','Helsinki','Petsamo','Viipuri','La fecha del 6 de diciembre corresponde a Taipale. Helsinki, Petsamo y Viipuri aparecen en el esquema de mandos y misiones. Véanse pp. 18–19.'],
+ [3,'¿Qué ocurrió el 15 de febrero de 1940 según la guía?','Mannerheim ordenó retirarse a una línea posterior','Finlandia ordenó el cese del fuego','Los soviéticos alcanzaron la bahía de Viborg','Las fuerzas finlandesas recuperaron lo perdido con su reserva','La retirada fue el 15 de febrero. Los otros hechos se fechan el 13 de marzo, el 2 de marzo y el 23 de diciembre, respectivamente. Véase p. 19.']
+]);
+group('Europa occidental',plans,[
+ [1,'¿A qué campaña corresponde el Plan Blanco?','Polonia','Primera campaña de Francia','Dinamarca y Noruega','Segunda campaña de Francia','El cuadro asocia el Plan Blanco con Polonia, el Plan Amarillo con la primera campaña de Francia, Weserübung con Dinamarca y Noruega y Neptuno con la segunda campaña de Francia.'],
+ [1,'¿Desde dónde se evacuaron las fuerzas anglo-francesas en la operación Dínamo?','Dunkerque','Cherburgo','Caen','Salerno','Dínamo fue la evacuación de Dunkerque. Cherburgo y Caen se mencionan en la segunda campaña de Francia, y Salerno en la campaña de Italia.'],
+ [2,'¿Qué operación quedó sin ejecutarse según el cuadro?','León Marino','Dínamo','Mercurio','Husky','León Marino figura como proyecto de invasión de Inglaterra sin ejecutar. Dínamo, Mercurio y Husky tienen fechas de ejecución en el cuadro.'],
+ [2,'¿Cómo se llamó la operación alemana de la campaña de Dinamarca y Noruega?','Weserübung','Dínamo','Plan Dyle','León Marino','Weserübung corresponde a Dinamarca y Noruega. Dínamo y Dyle pertenecen a la primera campaña de Francia, y León Marino a Inglaterra.'],
+ [3,'¿Con qué fase en Normandía relaciona el cuadro la operación Neptuno?','Aproximación y desembarco','Conquista de Cherburgo','Avance entre Caen y Falaise','Desembarco en la costa sur de Francia','El cuadro rotula Neptuno como aproximación y desembarco. Asocia los otros hechos a Overlord, Totalize y Dragón, respectivamente.'],
+ [3,'¿Qué nombre asigna el cuadro a la defensa aliada que cita Namur y el Mosa?','Plan Dyle','Plan Amarillo','Plan Blanco','Operación Dínamo','El cuadro vincula Namur y el Mosa con el Plan Dyle. Identifica el Plan Amarillo y el Plan Blanco como alemanes, y Dínamo como la evacuación de Dunkerque.']
+]);
+group('Balcanes',plans,[
+ [1,'¿Qué isla se vincula con la operación Mercurio?','Creta','Sicilia','Okinawa','Tarawa','Mercurio corresponde a Creta, Husky a Sicilia, Iceberg a Okinawa (p. 2) y Galvanic a Tarawa.'],
+ [2,'¿Qué operación figura como la evacuación del Peloponeso a Creta?','Demon','Mercurio','Dínamo','Husky','Demon fue la evacuación anglo-griega. Mercurio corresponde a la conquista de Creta, Dínamo a la evacuación de Dunkerque y Husky a Sicilia.'],
+ [3,'¿Cuál es el orden de inicio de estas tres operaciones según el cuadro?','Marita → Demon → Mercurio','Demon → Marita → Mercurio','Mercurio → Demon → Marita','Marita → Mercurio → Demon','En el cuadro, Marita empieza en octubre de 1940, Demon el 24 de abril de 1941 y Mercurio el 20 de mayo de 1941.']
+]);
+group('Balcanes',eval3,[
+ [2,'¿Qué relación temporal hubo entre la invasión alemana de Grecia y la de Yugoslavia?','Se iniciaron simultáneamente','Grecia comenzó tras terminar la invasión de Yugoslavia','Yugoslavia comenzó tras terminar la invasión de Grecia','Se iniciaron en años distintos','La pregunta 18 señala que ambas invasiones comenzaron simultáneamente. La pregunta 17 describe una secuencia particular dentro de esas operaciones: el avance de Von Stumme por el sur de Yugoslavia y su posterior entrada en Grecia.'],
+ [3,'Según la evaluación, ¿qué localidad conquistó Von Stumme el 11 de abril de 1941 al entrar en Grecia?','Florina','Janina','Arta','Belgrado','La pregunta 17 identifica Florina el 11 de abril, Janina el 19 y Arta el 21. Belgrado se trata en la pregunta 13 sobre Yugoslavia.'],
+ [3,'Según la evaluación, ¿quién mandaba los medios alemanes de la operación Mercurio?','General Student','General Von Weichs','General Von Kleist','General Von Stumme','La pregunta 11 identifica a Student en Creta. Los otros tres mandos se mencionan en la pregunta 13 sobre Yugoslavia.']
+]);
+group('Frente oriental',plans,[
+ [1,'¿Qué plan corresponde a la primera campaña de Rusia?','Barbarroja','Plan Blanco','Plan Amarillo','Plan Dyle','Barbarroja figura en la primera campaña de Rusia, Plan Blanco en Polonia y Plan Amarillo y Dyle en la primera campaña de Francia.'],
+ [2,'¿Con qué ciudad asocia el cuadro la operación Tifón?','Moscú','Dunkerque','Salerno','Arnhem','Tifón aparece vinculado a Viazma y Moscú. Dunkerque corresponde a Dínamo, Salerno a Avalanche y Arnhem a Huerto.'],
+ [3,'¿Qué relación cronológica establece el cuadro entre Barbarroja y Tifón?','Tifón empezó después de Barbarroja y ambos terminan en la misma fecha del cuadro','Ambos empezaron el mismo día','Tifón empezó antes de Barbarroja','Tifón empezó tras el término de Barbarroja','El cuadro fecha Barbarroja desde el 22 de junio y Tifón desde el 2 de octubre de 1941. Para ambos registra el 6 de diciembre de 1941 como término.'],
+ [3,'¿En qué campaña ubica el cuadro la operación Ciudadela?','Verano de 1943','Invierno de 1941','Primera campaña de Rusia','Segunda campaña de Francia','El cuadro asigna Ciudadela al verano de 1943, Zelaine al invierno de 1941, Barbarroja a la primera campaña de Rusia y Neptuno a la segunda de Francia.']
+]);
+group('Mediterráneo, África y Pacífico',plans,[
+ [1,'¿Qué isla figura como objetivo de Husky?','Sicilia','Creta','Tarawa','Okinawa','Husky corresponde a Sicilia, Mercurio a Creta, Galvanic a Tarawa e Iceberg a Okinawa (p. 2).'],
+ [1,'¿Qué operación menciona Casablanca, Orán y Argel?','Antorcha','Raso','Teseo','Galvanic','Antorcha se relaciona con esos tres desembarcos. Raso se vincula con Sfax, Teseo con Egipto y Galvanic con Tarawa.'],
+ [2,'¿Qué localidad se asocia con el desembarco de la operación Shingle?','Anzio','Salerno','Tarento','Bari','El cuadro asigna Anzio a Shingle, Salerno a Avalanche y Tarento y Bari a Slapstick.'],
+ [2,'¿En qué campaña sitúa el cuadro la operación Teseo?','Segunda campaña de Egipto','Campaña de Túnez','Tercera campaña de Libia','Segunda campaña del Pacífico','El cuadro sitúa Teseo en la segunda campaña de Egipto, Raso en Túnez, Antorcha en la tercera de Libia y Galvanic en la segunda del Pacífico.'],
+ [3,'¿Qué secuencia de operaciones de Italia respeta las fechas de inicio del cuadro?','Husky → Baytown → Avalanche → Shingle','Baytown → Husky → Avalanche → Shingle','Husky → Avalanche → Baytown → Shingle','Shingle → Husky → Baytown → Avalanche','Husky comienza el 10 de julio de 1943, Baytown el 2 de septiembre, Avalanche el 9 de septiembre y Shingle el 21 de enero de 1944.'],
+ [3,'¿Qué par de operaciones de la campaña de Italia comparte fecha de inicio en el cuadro?','Avalanche y Slapstick','Husky y Baytown','Baytown y Avalanche','Slapstick y Shingle','Avalanche y Slapstick empezaron el 9 de septiembre de 1943. Baytown figura el 2 de septiembre, Husky el 10 de julio y Shingle el 21 de enero de 1944.']
+]);
+group('Cronología',chrono,[
+ [2,'¿Qué campaña empezó primero según el cuadro cronológico?','Polonia','Finlandia','Dinamarca y Noruega','Primera campaña de Francia','El inicio de Polonia figura en septiembre de 1939, Finlandia en noviembre de 1939, Dinamarca y Noruega en abril de 1940 y la primera campaña de Francia en mayo de 1940.'],
+ [2,'¿Qué dos campañas del cuadro empezaron en 1939?','Polonia y Finlandia','Polonia y Dinamarca y Noruega','Finlandia y primera campaña de Francia','Dinamarca y Noruega y primera campaña de Francia','El cuadro registra inicios en 1939 para Polonia y Finlandia. Las otras dos campañas indicadas comenzaron en 1940.'],
+ [3,'Según el cuadro, ¿qué campaña de estas comenzó después de la de los Balcanes?','Primera campaña de Rusia','Primera campaña de Francia','Dinamarca y Noruega','Finlandia','El cuadro ubica el inicio de los Balcanes en octubre de 1940 y el de la primera campaña de Rusia en junio de 1941. Las otras tres campañas iniciaron antes de los Balcanes.']
+]);
+const $=id=>document.getElementById(id);
+const letters='ABCD';
+const prizes=[100,200,300,500,1000,2000,4000,8000,16000,32000,64000,125000,250000,500000,1000000];
+const defaults={name:'',title:'Archivo de Campaña',mode:'classic',topic:'Todas',count:15,level:'0',currency:'$',prizes,delay:0,limit:0,music:30,effects:50,crowd:40,voice:true,aids:true,shuffle:true};
+const storageKey='archivo-campana-v1';
+function load(){try{return JSON.parse(localStorage.getItem(storageKey))||{}}catch{return {}}}
+const saved=load();
+let cfg={...defaults,...saved.cfg},history=saved.history||[],custom=saved.custom||[],game=saved.game||null, muted=false;
+let audio,bed,clock,job,generation=0;
+const money=x=>cfg.currency+Number(x).toLocaleString('es-CL');
+const shuffle=array=>{const values=[...array];for(let i=values.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[values[i],values[j]]=[values[j],values[i]]}return values};
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function save(){try{localStorage.setItem(storageKey,JSON.stringify({cfg,history,custom,game}))}catch{}}
+function unlock(){try{audio??=new (window.AudioContext||window.webkitAudioContext)();if(!muted)audio.resume().catch(()=>{})}catch{}}
+function tone(from,to,duration,offset=0,volume=.16,type='sine',channel='effects'){
+  if(!audio||muted||!cfg[channel])return;
+  const at=audio.currentTime+offset,osc=audio.createOscillator(),gain=audio.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(from,at);osc.frequency.exponentialRampToValueAtTime(to,at+duration);
+  gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,volume*cfg[channel]/100),at+Math.min(.03,duration/3));gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
+  osc.connect(gain).connect(audio.destination);osc.start(at);osc.stop(at+duration+.01);
+}
+function crowd(length,strength,fail=false){
+  if(!audio||muted||!cfg.crowd)return;
+  const buffer=audio.createBuffer(1,Math.ceil(audio.sampleRate*length),audio.sampleRate),data=buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++){const t=i/audio.sampleRate;const texture=fail?(.55+.35*Math.sin(t*19)):Math.pow(Math.abs(Math.sin(t*95)*Math.cos(t*163)),2);data[i]=(.5-Math.random())*Math.sin(Math.PI*i/data.length)*texture}
+  const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain();
+  source.buffer=buffer;filter.type='bandpass';filter.frequency.value=fail?370:1500;filter.Q.value=.6;gain.gain.value=strength*cfg.crowd/100;source.connect(filter).connect(gain).connect(audio.destination);source.start();
+}
+const effects={
+  1:()=>chord([146,220,293,440],.14,.69),2:()=>tone(170,640,.28),
+  3:()=>tone(290,345,.1),4:()=>tone(320,385,.1),5:()=>tone(350,420,.1),6:()=>tone(390,460,.1),
+  7:()=>tone(660,540,.05,0,.035),8:()=>chord([366,570],.06,.2),9:()=>tone(102,39,.62,0,.32,'triangle'),
+  10:()=>tone(64,38,.55,0,.25,'triangle'),11:()=>chord(game?.index>8?[294,370,440,587,740]:[370,494,659],.11,.42),
+  12:()=>{tone(180,49,.85,0,.27,'triangle');crowd(.73,.44,true)},
+  13:()=>crowd(.8,.65),14:()=>crowd(1.7,.86),15:()=>{crowd(3.2,1);tone(620,419,1.02,.45,.065,'triangle')},
+  16:()=>chord([310,527,740],.08,.25),17:()=>chord([500,270],.19,.17),
+  18:()=>chord([180,400,620],.10,.30),19:()=>chord([697,1209,770,1336],.13,.15),
+  20:()=>tone(420,260,.10,0,.08),21:()=>tone(260,550,.23),22:()=>chord([220,330,440,660],.12,.48),
+  23:()=>chord([440,330,415],.14,.46),24:()=>chord([220,330,440,550,660,880],.15,.76),
+  25:()=>chord([392,294,196],.17,.48)
+};
+function chord(notes,gap,time){notes.forEach((hz,i)=>tone(hz,hz,time,gap*i,.14,'triangle'))}
+function sfx(id){effects[id]?.()}
+function atmosphere(active){
+  clearInterval(bed);
+  if(!active)return;
+  const pulse=()=>{const depth=Math.floor(game.index*3/game.deck.length);tone([108,75,48][depth],[78,49,32][depth],.75,0,.17,'triangle','music');if(depth>0)tone(57,44,.38,.48,.12,'sine','music')};
+  pulse();bed=setInterval(pulse,game.index===game.deck.length-1?950:1540);
+}
+function say(message,rate=.91){
+  if(!cfg.voice||muted||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;
+  speechSynthesis.cancel();
+  const speech=new SpeechSynthesisUtterance(message);const voices=speechSynthesis.getVoices();
+  speech.voice=voices.find(v=>/^es-(CL|MX|US|AR|CO)/i.test(v.lang)&&/jorge|raul|raul|carlos|diego|juan|male|pablo/i.test(v.name))||voices.find(v=>/^es-(CL|MX|US|AR|CO)/i.test(v.lang))||voices.find(v=>/^es/i.test(v.lang))||null;
+  speech.lang=speech.voice?.lang||'es-CL';speech.rate=rate;speech.pitch=.77;speech.volume=.82;speechSynthesis.speak(speech);
+}
+const clipText=(value,n)=>String(value||'').trim().slice(0,n);
+function number(id,min,max,fallback){const n=Number($(id).value);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.round(n))):fallback}
+function menu(message=''){
+  clearInterval(clock);clearTimeout(job);generation++;atmosphere(false);$('title').textContent=cfg.title;
+  const topics=[...new Set([...entries,...custom].map(q=>q.topic))];
+  const prior=history.flatMap(h=>h.log);
+  const totalRight=prior.filter(a=>a.right).length;
+  const misses=prior.filter(a=>!a.right&&a.q);
+  const weak=Object.entries(misses.reduce((out,a)=>(out[a.q.topic]=(out[a.q.topic]||0)+1,out),{})).sort((a,b)=>b[1]-a[1]);
+  $('screen').innerHTML=`<section class="panel"><h2>Elige cómo jugar</h2><p class="muted">Responde cuatro alternativas por pregunta. Los premios son ficticios.</p>
+  <div class="form"><label>Concursante<input id="player" maxlength="45" value="${esc(cfg.name)}"></label><label>Título<input id="heading" maxlength="65" value="${esc(cfg.title)}"></label>
+  <label>Modo<select id="mode"><option value="classic">Concurso clásico</option><option value="study">Modo estudio</option></select></label>
+  <label>Tema<select id="topic"><option>Todas</option>${topics.map(t=>`<option>${esc(t)}</option>`).join('')}</select></label>
+  <label>Dificultad<select id="level"><option value="0">Progresiva</option><option value="1">Inicial</option><option value="2">Intermedia</option><option value="3">Avanzada</option></select></label>
+  <label>Preguntas<input id="count" type="number" min="1" max="15" value="${cfg.count}"></label>
+  <label>Moneda o prefijo<input id="currency" maxlength="8" value="${esc(cfg.currency)}"></label>
+  <label>Suspenso (0 = progresivo)<input id="delay" type="number" min="0" max="8" value="${cfg.delay}"></label><label>Tiempo por pregunta (0 = libre)<input id="limit" type="number" min="0" max="600" value="${cfg.limit}"></label></div>
+  <details><summary>Audio, premios y banco</summary><div class="form">${[['music','Música'],['effects','Efectos'],['crowd','Público']].map(([key,label])=>`<label>${label}<input id="${key}" type="range" min="0" max="100" value="${cfg[key]}"></label>`).join('')}
+  ${[['voice','Presentador virtual'],['aids','Tres comodines'],['shuffle','Barajar alternativas']].map(([key,label])=>`<label><span><input id="${key}" type="checkbox" ${cfg[key]?'checked':''}> ${label}</span></label>`).join('')}
+  <label>15 montos ascendentes, separados por coma<input id="amounts" value="${cfg.prizes.join(',')}"></label><label>Banco adicional en JSON<input id="bank" type="file" accept=".json,application/json"></label></div>
+  <p class="muted">Importa una lista de preguntas con los campos question, answers (cuatro textos), correct (índice 0–3), topic, level (1–3), explain y source. Usa tus documentos como fuente.</p><p id="bankInfo">${custom.length} preguntas adicionales.</p></details>
+  <div class="toolbar"><button class="primary" id="start">Entrar al estudio</button>${game&&game.phase!=='end'?'<button id="resume">Continuar partida guardada</button>':''}${misses.length?'<button id="retry">Practicar preguntas falladas</button>':''}</div>
+  <p id="notice" class="notice" role="status">${esc(message)}</p></section>
+  <section class="panel"><h2>Historial de estudio</h2><p>${history.length} partidas · ${prior.length} respuestas · ${prior.length?Math.round(100*totalRight/prior.length)+' % de aciertos':'Sin respuestas registradas'}</p>
+  ${weak.length?`<p>Temas por reforzar: ${weak.map(([t,n])=>esc(t)+' ('+n+')').join(', ')}</p>`:''}
+  ${history.slice(0,10).map(h=>`<details class="review"><summary>${esc(h.date)} · ${esc(h.name||'Concursante')} · ${h.log.filter(x=>x.right).length}/${h.log.length} · ${esc(h.reward)}</summary>${h.log.map(review).join('')}</details>`).join('')}</section>`;
+  $('mode').value=cfg.mode;$('topic').value=cfg.topic;$('level').value=cfg.level;
+  $('start').onclick=()=>start();
+  if($('retry'))$('retry').onclick=()=>start([...new Map(misses.map(a=>[a.q.id,a.q])).values()]);
+  if($('resume'))$('resume').onclick=()=>{unlock();if(game.phase==='lock'){render();reveal(game.chosen)}else if(game.phase==='intro'||game.phase==='open'){openQuestion(true)}else render()};
+  $('bank').onchange=async e=>{
+    try{
+      const file=e.target.files[0]; if(!file)return;
+      const data=JSON.parse(await file.text());
+      if(!Array.isArray(data)||!data.length||data.length>500)throw Error('El archivo debe contener entre 1 y 500 preguntas.');
+      const questions=new Set(entries.map(q=>q.question.toLowerCase().trim()));
+      const next=data.map((q,i)=>{
+        if(!q||!['question','topic','explain','source'].every(k=>typeof q[k]==='string'&&q[k].trim())||
+           !Array.isArray(q.answers)||q.answers.length!==4||q.answers.some(a=>typeof a!=='string'||!a.trim())||
+           new Set(q.answers.map(a=>a.toLowerCase().trim())).size!==4||
+           !Number.isInteger(q.correct)||q.correct<0||q.correct>3||![1,2,3].includes(q.level)||questions.has(q.question.toLowerCase().trim()))throw Error('Revisa la pregunta '+(i+1)+'.');
+        questions.add(q.question.toLowerCase().trim());return {...q,id:'custom:'+q.question.toLowerCase().trim()};
+      });
+      custom=next;save();for(const t of new Set(custom.map(q=>q.topic))){if(![...$('topic').options].some(o=>o.value===t))$('topic').add(new Option(t,t))}
+      $('bankInfo').textContent=custom.length+' preguntas adicionales cargadas.';
+    }catch(err){$('bankInfo').textContent=err.message}
+  };
+}
+function start(retry){
+  const scale=$('amounts').value.split(',').map(s=>Number(s.trim()));
+  if(scale.length!==15||scale.some((s,i)=>!Number.isSafeInteger(s)||s<1||(i>0&&s<=scale[i-1]))){$('notice').textContent='Ingresa 15 montos enteros, positivos y en aumento.';return}
+  const next={name:clipText($('player').value,45),title:clipText($('heading').value,65)||defaults.title,mode:retry?'study':$('mode').value,topic:retry?'Todas':$('topic').value,count:number('count',1,15,15),level:$('level').value,currency:clipText($('currency').value,8)||'$',prizes:scale,delay:number('delay',0,8,0),limit:number('limit',0,600,0)};
+  next.delay=next.delay?Math.max(2,next.delay):0;
+  for(const key of ['music','effects','crowd'])next[key]=number(key,0,100,defaults[key]);
+  for(const key of ['voice','aids','shuffle'])next[key]=$(key).checked;
+  const pool=retry||[...entries,...custom].filter(q=>(next.topic==='Todas'||q.topic===next.topic)&&(+next.level===0||q.level===+next.level));
+  if(!pool.length){$('notice').textContent='Este filtro no tiene preguntas. Elige otro tema o nivel.';return}
+  const deck=[];
+  const tiers=[1,2,3].map(level=>shuffle(pool.filter(q=>q.level===level)));
+  if(pool.length>=next.count&&next.level==='0'&&!retry){
+    for(let i=0;i<next.count;i++){
+      const target=Math.floor(i*3/next.count);
+      const available=[0,1,2].filter(t=>tiers[t].length).sort((a,b)=>Math.abs(a-target)-Math.abs(b-target));
+      deck.push(tiers[available[0]].pop());
+    }
+  }else deck.push(...shuffle(pool).slice(0,next.count));
+  cfg=next;unlock();sfx(1);
+  game={deck:deck.sort((a,b)=>a.level-b.level).map(q=>{
+    const alternatives=q.answers.map((text,i)=>({text,right:i===q.correct}));
+    return {...q,options:cfg.shuffle?shuffle(alternatives):[...alternatives.slice((q.level+deck.indexOf(q))%4),...alternatives.slice(0,(q.level+deck.indexOf(q))%4)]};
+  }),index:0,chosen:null,used:{},removed:[],log:[],won:0,safe:0,phase:'intro',mode:cfg.mode};
+  $('title').textContent=cfg.title;save();
+  say('Bienvenido a '+cfg.title+'. '+(game.deck.length<cfg.count?'Hay '+game.deck.length+' preguntas en esta selección. ':'')+'Vamos con la primera pregunta.');
+  openQuestion(false,true);
+}
+function openQuestion(resume=false,first=false){
+  clearInterval(clock);clearTimeout(job);
+  const token=++generation;
+  if(!resume)Object.assign(game,{chosen:null,removed:[],aid:null,phase:'intro',time:cfg.limit,shown:0});
+  else {
+    if(game.aid?.busy&&game.aid.type==='half')delete game.used.half;
+    Object.assign(game,{aid:game.aid?.busy?null:game.aid,phase:'open',shown:4});
+  }
+  render();save();
+  if(resume){atmosphere(true);setClock();return}
+  if(!first)say(game.index===game.deck.length-1?'Llegaste a la última pregunta.':'Vamos con la siguiente pregunta.');
+  sfx(21);setTimeout(()=>{if(generation===token)sfx(2)},170);
+  for(let i=0;i<4;i++)setTimeout(()=>{
+    if(generation!==token)return;
+    game.shown=i+1;sfx(3+i);
+    if(i===3){game.phase='open';atmosphere(true);setClock();save()}
+    render();
+  },420+155*i);
+}
+function setClock(){
+  clearInterval(clock);
+  if(!cfg.limit)return;
+  clock=setInterval(()=>{
+    if(game.phase!=='open'||game.aid?.busy)return;
+    game.time--;if(game.time<=0){confirm(true);return}
+    const el=$('timer');if(el)el.textContent=game.time+' s';save();
+  },1000);
+}
+function choose(i){
+  if(game?.phase!=='open'||game.aid?.busy||game.removed.includes(i))return;
+  unlock();game.chosen=i;sfx(8);say('¿Es esa tu respuesta definitiva?');save();render('yes');
+}
+function confirm(timeout=false){
+  if(game.phase!=='open'||(!timeout&&(game.chosen===null||game.aid?.busy)))return;
+  clearInterval(clock);atmosphere(false);
+  const selected=timeout?null:game.chosen;
+  game.chosen=selected;game.phase='lock';game.aid=null;
+  render();save();sfx(9);
+  const ratio=game.deck.length>1?game.index/(game.deck.length-1):0;
+  const seconds=timeout?2:(cfg.delay||2+Math.round(ratio*6));const token=++generation;
+  if(!timeout)say('Veamos si has acertado.',.76);
+  for(let t=.6;t<seconds-.55;t+=Math.max(.68,1.22-ratio*.38))setTimeout(()=>{if(generation===token)sfx(10)},t*1000);
+  setTimeout(()=>{if(generation===token)tone(70,180,.3,0,.11,'triangle')},(seconds-.52)*1000);
+  job=setTimeout(()=>{if(token===generation)reveal(selected)},seconds*1000);
+}
+function reveal(selected){
+  const q=game.deck[game.index],answer=q.options.findIndex(o=>o.right),right=selected===answer;
+  game.log.push({q,selected,answer,right});game.phase='result';
+  if(right){
+    game.won=cfg.prizes[game.index];if([4,9].includes(game.index))game.safe=game.won;
+    const max=game.index===game.deck.length-1;
+    sfx(max?24:11);sfx(max?15:game.index>=4?14:13);
+    if([4,9].includes(game.index)&&!max)setTimeout(()=>{if(game?.phase==='result')sfx(22)},575);
+    say(max?'¡Respuesta correcta! Has completado la partida.':[4,9].includes(game.index)?'¡Respuesta correcta! Has llegado a un premio asegurado.':'¡Respuesta correcta!',1);
+  }else{sfx(12);say(selected===null?'Se acabó el tiempo.':'Respuesta incorrecta.')}
+  save();render('next');
+}
+function next(){
+  if(game.phase!=='result')return;
+  const last=game.log.at(-1);const final=game.index===game.deck.length-1;
+  if(final||(!last.right&&game.mode==='classic')){
+    finish(last.right?'victory':game.mode==='study'?'study':'loss');return;
+  }
+  game.index++;openQuestion();
+}
+function finish(kind){
+  if(game.phase==='end'||game.phase==='lock')return;
+  clearTimeout(job);clearInterval(clock);generation++;atmosphere(false);
+  game.phase='end';game.end=kind;game.reward=kind==='loss'?game.safe:game.won;
+  history.unshift({date:new Date().toLocaleDateString('es-CL'),name:cfg.name,reward:money(game.reward),log:[...game.log]});
+  history=history.slice(0,40);if(kind==='retire')sfx(23);else if(kind!=='victory')sfx(25);save();render('again');
+}
+function recommendation(q,remaining,audience){
+  const right=q.options.findIndex(o=>o.right);
+  const chance=(audience?[.88,.69,.53]:[.83,.64,.47])[q.level-1];
+  return Math.random()<chance?right:shuffle(remaining.filter(i=>i!==right))[0];
+}
+function aid(type){
+  if(game.phase!=='open'||game.used[type]||game.aid?.busy)return;
+  game.used[type]=true;sfx(16);
+  const q=game.deck[game.index],remaining=[0,1,2,3].filter(i=>!game.removed.includes(i));
+  game.aid={type,busy:true};
+  render();save();
+  const token=generation;
+  if(type==='half'){
+    job=setTimeout(()=>{
+      if(token!==generation)return;
+      game.removed=shuffle(remaining.filter(i=>!q.options[i].right)).slice(0,2);
+      if(game.removed.includes(game.chosen))game.chosen=null;
+      game.aid={type};sfx(17);save();render();
+    },490);return;
+  }
+  const pick=recommendation(q,remaining,type==='poll');
+  if(type==='poll'){
+    sfx(18);
+    job=setTimeout(()=>{
+      if(token!==generation)return;
+      const weights=[0,0,0,0];for(const i of remaining)weights[i]=i===pick?35+Math.floor(Math.random()*13):7+Math.floor(Math.random()*19);
+      const sum=weights.reduce((a,b)=>a+b,0),percent=weights.map(x=>Math.floor(x*100/sum));
+      percent[pick]+=100-percent.reduce((a,b)=>a+b,0);
+      game.aid={type,percent};sfx(18);save();render();
+    },1400);return;
+  }
+  sfx(19);
+  let time=30;
+  game.aid={type,busy:true,time};render();
+  const tick=()=>{
+    if(token!==generation||game.aid?.type!=='call')return;
+    --time;
+    if(time===25){
+      game.aid.pick=pick;game.aid.confidence=['Alta','Media','Baja'][q.level-1];
+      say('Me inclino por la alternativa '+letters[pick]+'. Mi seguridad es '+game.aid.confidence.toLowerCase()+'.');
+    }
+    if(time<=5&&time>0)sfx(20);
+    game.aid.time=time;game.aid.busy=time>0;render();save();
+    if(time>0)job=setTimeout(tick,1000);
+  };
+  job=setTimeout(tick,1000);
+}
+function review(a){
+  return `<div class="review"><p><strong>${esc(a.q.question)}</strong></p><p>${a.right?'✓ Acierto':'✗ Error'} · Tu respuesta: ${a.selected===null?'Sin respuesta':esc(letters[a.selected]+' · '+a.q.options[a.selected].text)}</p><p>Correcta: ${esc(letters[a.answer]+' · '+a.q.options[a.answer].text)}</p><p>${esc(a.q.explain)}</p><small>Fuente: ${esc(a.q.source)}</small></div>`;
+}
+function aidHtml(a){
+  if(!a)return '';
+  if(a.type==='poll')return a.busy?'<p>El público está votando…</p>':`<p>Votación simulada del público</p><div class="poll">${a.percent.map((v,i)=>`<div><strong>${v}%</strong><span class="bar" style="--v:${v}"></span>${letters[i]}</div>`).join('')}</div>`;
+  if(a.type==='half')return `<p>${a.busy?'Procesando 50:50…':'Se eliminaron dos alternativas.'}</p>`;
+  return `<p>${a.busy?'Llamada simulada · '+a.time+' s':'Llamada terminada'}</p>${a.pick!==undefined?`<p>El amigo sugiere ${letters[a.pick]}. Seguridad estimada: ${a.confidence.toLowerCase()}.</p>`:''}${a.busy?'<button id="hang">Finalizar llamada</button>':''}`;
+}
+function render(focus){
+  if(!game)return;
+  const {index,deck,phase,chosen,removed,used,log}=game,q=deck[index],last=log.at(-1),locked=phase==='lock',result=phase==='result',can=phase==='open'&&!game.aid?.busy,final=index===deck.length-1;
+  if(phase==='end'){
+    const title={victory:'¡Concurso completado!',loss:'Fin del concurso',retire:'Retirada voluntaria',study:'Estudio completado'}[game.end];
+    $('screen').innerHTML=`<section class="panel stage ${game.end==='victory'?'win':''}"><h2>${title}</h2><p>Tu premio final es <strong>${esc(money(game.reward))}</strong>.</p><p>${log.filter(a=>a.right).length} de ${log.length} respuestas correctas.</p><div class="toolbar"><button id="again" class="primary">Volver al inicio</button></div><details><summary>Revisar respuestas</summary>${log.length?log.map(review).join(''):'Esta partida quedó sin respuestas.'}</details></section>`;
+    $('again').onclick=()=>{game=null;save();menu()};if(focus)$('again').focus();return;
+  }
+  const headline=result?(last.right?'¡RESPUESTA CORRECTA!':'RESPUESTA INCORRECTA'):locked?'Respuesta bloqueada. Revelando resultado…':chosen!==null?'¿Es esa tu respuesta definitiva?':'';
+  const ladder=deck.map((_,i)=>`<li class="${[4,9].includes(i)?'safe ':''}${i===index?'live':i<index?'passed':''}" ${i===index?'aria-current="step"':''}><span>${i+1}${[4,9].includes(i)?'<span aria-label=" Premio asegurado"> ◆</span>':''}</span><span>${esc(money(cfg.prizes[i]))}</span></li>`).reverse().join('');
+  const options=q.options.map((o,i)=>{
+    const gone=removed.includes(i);
+    const style=result&&o.right?'correct':result&&i===chosen?'wrong':gone?'gone':i===chosen?'selected':'';
+    return `<button class="answer ${style}" id="opt${i}" ${i>=game.shown?'style="visibility:hidden"':''} ${!can||gone?'disabled':''} aria-pressed="${i===chosen}"><b>${letters[i]}</b><span>${gone?'Eliminada':esc(o.text)}</span></button>`;
+  }).join('');
+  $('screen').innerHTML=`<div class="layout"><main class="panel stage ${locked?'suspense':result&&last.right&&final?'win':result&&!last.right?'loss':''}">
+  <div class="row"><div><div class="label">${esc(q.topic)}</div><small>Pregunta ${index+1} de ${deck.length}${cfg.name?' · '+esc(cfg.name):''}</small></div><div><strong>${esc(money(cfg.prizes[index]))}</strong> <small>en juego</small></div></div>
+  <div class="progress" role="progressbar" aria-label="Preguntas respondidas" aria-valuenow="${log.length}" aria-valuemax="${deck.length}"><span style="width:${100*log.length/deck.length}%"></span></div>
+  <h2 id="prompt" tabindex="-1">${esc(q.question)}</h2><div class="answers">${options}</div>
+  <div class="row"><small>Asegurado ${esc(money(game.safe))} · Acumulado ${esc(money(game.won))}</small><strong id="timer">${cfg.limit&&phase==='open'?game.time+' s':''}</strong></div>
+  ${cfg.aids?`<div class="toolbar" aria-label="Comodines">${[['half','50:50'],['poll','♟ Público'],['call','☎ Llamada']].map(([k,v])=>`<button id="aid-${k}" class="aid" ${!can||used[k]?'disabled':''}>${v}${used[k]?' · Usado':''}</button>`).join('')}</div>`:''}
+  <div aria-live="polite">${aidHtml(game.aid)}</div>
+  <p class="notice" aria-live="polite">${headline}</p>
+  ${result?`<p>${last.right?'Has ganado '+esc(money(game.won))+(!final?'. ¿Quieres continuar por '+esc(money(cfg.prizes[index+1]))+'?':'.'):`La respuesta correcta era ${letters[last.answer]} · ${esc(q.options[last.answer].text)}.${game.mode==='classic'?' Tu premio final es '+esc(money(game.safe))+'.':''}`}</p>`:''}
+  <div class="toolbar">${can&&chosen!==null?'<button class="primary" id="yes">Confirmar respuesta</button><button id="change">Cambiar respuesta</button>':''}
+  ${can||result&&last.right&&!final?'<button id="retire">Retirarme</button>':''}
+  ${result?`<button class="primary" id="next">${final||!last.right&&game.mode==='classic'?'Ver resultado final':'Continuar'}</button>`:''}</div>
+  ${result&&game.mode==='study'?review(last):''}</main><aside class="panel"><h2>Premios</h2><ol class="ladder">${ladder}</ol></aside></div>`;
+  for(let i=0;i<4;i++){const b=$('opt'+i);b.onclick=()=>choose(i);b.onpointerenter=()=>{if(can&&!removed.includes(i))sfx(7)}}
+  for(const k of ['half','poll','call'])if($('aid-'+k))$('aid-'+k).onclick=()=>aid(k);
+  if($('hang'))$('hang').onclick=()=>{clearTimeout(job);game.aid.busy=false;save();render()};
+  if($('yes'))$('yes').onclick=()=>confirm();
+  if($('change'))$('change').onclick=()=>{game.chosen=null;save();render('opt0')};
+  if($('next'))$('next').onclick=next;
+  if($('retire'))$('retire').onclick=()=>finish('retire');
+  if(focus&&$(focus))$(focus).focus({preventScroll:true});
+}
+$('mute').onclick=()=>{unlock();muted=!muted;$('mute').textContent=muted?'Activar sonido':'Silenciar';if(audio)(muted?audio.suspend():audio.resume()).catch(()=>{});if(muted)window.speechSynthesis?.cancel()};
+$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{$('status').textContent='La pantalla completa no está disponible en este visor.'}};
+document.addEventListener('keydown',e=>{
+  if(e.repeat||e.altKey||e.ctrlKey||e.metaKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)||!game||!$('opt0'))return;
+  const i=letters.indexOf(e.key.toUpperCase());
+  if(e.key.length===1&&i>=0){e.preventDefault();choose(i)}
+  if(e.key==='Enter'&&e.target.tagName!=='BUTTON'&&$('yes')){e.preventDefault();confirm()}
+});
+menu();
+</script>
+</body></html>
